@@ -3,16 +3,16 @@ import UIKit
 public protocol DayViewDelegate: AnyObject {
     func dayViewDidSelectEventView(_ eventView: EventView)
     func dayViewDidLongPressEventView(_ eventView: EventView)
-    func dayView(dayView: DayView, didTapTimelineAt date: Date)
-    func dayView(dayView: DayView, didLongPressTimelineAt date: Date)
-    func dayViewDidBeginDragging(dayView: DayView)
-    func dayViewDidTransitionCancel(dayView: DayView)
-    func dayView(dayView: DayView, willMoveTo date: Date)
-    func dayView(dayView: DayView, didMoveTo  date: Date)
-    func dayView(dayView: DayView, didUpdate event: EventDescriptor)
+    func dayView(dayView: CalendarDayView, didTapTimelineAt date: Date)
+    func dayView(dayView: CalendarDayView, didLongPressTimelineAt date: Date)
+    func dayViewDidBeginDragging(dayView: CalendarDayView)
+    func dayViewDidTransitionCancel(dayView: CalendarDayView)
+    func dayView(dayView: CalendarDayView, willMoveTo date: Date)
+    func dayView(dayView: CalendarDayView, didMoveTo  date: Date)
+    func dayView(dayView: CalendarDayView, didUpdate event: EventDescriptor)
 }
 
-public class DayView: UIView, TimelinePagerViewDelegate {
+public class CalendarDayView: UIView, TimelinePagerViewDelegate {
     public weak var dataSource: EventDataSource? {
         get {
             timelinePagerView.dataSource
@@ -27,7 +27,7 @@ public class DayView: UIView, TimelinePagerViewDelegate {
     /// Hides or shows header view
     public var isHeaderViewVisible = true {
         didSet {
-            headerHeight = isHeaderViewVisible ? DayView.headerVisibleHeight : 0
+            headerHeight = isHeaderViewVisible ? CalendarDayView.headerVisibleHeight : 0
             dayHeaderView.isHidden = !isHeaderViewVisible
             setNeedsLayout()
             configureLayout()

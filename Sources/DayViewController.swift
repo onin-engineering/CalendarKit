@@ -1,7 +1,7 @@
 import UIKit
 
 open class DayViewController: UIViewController, EventDataSource, DayViewDelegate {
-    public lazy var dayView: DayView = DayView()
+    public lazy var dayView: CalendarDayView = CalendarDayView()
     public var dataSource: EventDataSource? {
         get {
             dayView.dataSource
@@ -88,15 +88,15 @@ open class DayViewController: UIViewController, EventDataSource, DayViewDelegate
     open func dayViewDidSelectEventView(_ eventView: EventView) {}
     open func dayViewDidLongPressEventView(_ eventView: EventView) {}
 
-    open func dayView(dayView: DayView, didTapTimelineAt date: Date) {}
-    open func dayViewDidBeginDragging(dayView: DayView) {}
-    open func dayViewDidTransitionCancel(dayView: DayView) {}
+    open func dayView(dayView: CalendarDayView, didTapTimelineAt date: Date) {}
+    open func dayViewDidBeginDragging(dayView: CalendarDayView) {}
+    open func dayViewDidTransitionCancel(dayView: CalendarDayView) {}
 
-    open func dayView(dayView: DayView, willMoveTo date: Date) {}
-    open func dayView(dayView: DayView, didMoveTo date: Date) {}
+    open func dayView(dayView: CalendarDayView, willMoveTo date: Date) {}
+    open func dayView(dayView: CalendarDayView, didMoveTo date: Date) {}
 
-    open func dayView(dayView: DayView, didLongPressTimelineAt date: Date) {}
-    open func dayView(dayView: DayView, didUpdate event: EventDescriptor) {}
+    open func dayView(dayView: CalendarDayView, didLongPressTimelineAt date: Date) {}
+    open func dayView(dayView: CalendarDayView, didUpdate event: EventDescriptor) {}
 
     // MARK: - Editing
 
