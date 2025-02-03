@@ -106,20 +106,6 @@ open class EventView: UIView {
         }
         context.interpolationQuality = .none
         context.saveGState()
-        context.setStrokeColor(color.cgColor)
-        context.setLineWidth(3)
-        context.setLineCap(.round)
-        context.translateBy(x: 0, y: 0.5)
-        let leftToRight = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .leftToRight
-        let x: Double = leftToRight ? 0 : frame.width - 1.0  // 1 is the line width
-        let y: Double = 0
-        let hOffset: Double = 3
-        let vOffset: Double = 5
-        context.beginPath()
-        context.move(to: CGPoint(x: x + 2 * hOffset, y: y + vOffset))
-        context.addLine(to: CGPoint(x: x + 2 * hOffset, y: (bounds).height - vOffset))
-        context.strokePath()
-        context.restoreGState()
     }
     
     private var drawsShadow = false
@@ -130,7 +116,7 @@ open class EventView: UIView {
             if UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .rightToLeft {
                 return CGRect(x: bounds.minX, y: bounds.minY - 3, width: bounds.width - 3, height: bounds.height)
             } else {
-                return CGRect(x: bounds.minX + 8, y: bounds.minY - 3, width: bounds.width - 6, height: bounds.height)
+                return CGRect(x: bounds.minX + 5, y: bounds.minY - 3, width: bounds.width - 6, height: bounds.height)
             }
         }()
         if frame.minY < 0 {
