@@ -128,9 +128,9 @@ open class EventView: UIView {
         super.layoutSubviews()
         textView.frame = {
             if UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .rightToLeft {
-                return CGRect(x: bounds.minX, y: bounds.minY, width: bounds.width - 3, height: bounds.height)
+                return CGRect(x: bounds.minX, y: bounds.minY - 3, width: bounds.width - 3, height: bounds.height)
             } else {
-                return CGRect(x: bounds.minX + 8, y: bounds.minY, width: bounds.width - 6, height: bounds.height)
+                return CGRect(x: bounds.minX + 8, y: bounds.minY - 3, width: bounds.width - 6, height: bounds.height)
             }
         }()
         if frame.minY < 0 {
