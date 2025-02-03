@@ -34,6 +34,13 @@ public final class AllDayView: UIView {
         return sv
     }()
 
+    private lazy var bottomBorder: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = SystemColors.systemSeparator
+        return view
+    }()
+
     // MARK: - RETURN VALUES
 
     override init(frame: CGRect) {
@@ -62,13 +69,14 @@ public final class AllDayView: UIView {
         backgroundColor = style.backgroundColor
         textLabel.font = style.allDayFont
         textLabel.textColor = style.allDayColor
+        bottomBorder.backgroundColor = style.separatorColor
     }
 
     private func configure() {
         clipsToBounds = true
         addSubview(scrollView)
-        //add All-Day UILabel
         addSubview(textLabel)
+        addSubview(bottomBorder)
 
         let svLeftConstraint = scrollView.leadingAnchor.constraint(equalTo: textLabel.trailingAnchor, constant: 8)
 
@@ -121,6 +129,12 @@ public final class AllDayView: UIView {
 
         let maxAllDayViewHeight = allDayEventHeight * 2 + allDayEventHeight * 0.5
         heightAnchor.constraint(lessThanOrEqualToConstant: maxAllDayViewHeight).isActive = true
+
+        // Add bottom border constraints
+        bottomBorder.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        bottomBorder.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        bottomBorder.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        bottomBorder.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
 
         updateStyle(style)
     }
