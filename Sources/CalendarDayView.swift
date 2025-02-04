@@ -38,7 +38,7 @@ public class CalendarDayView: UIView, TimelinePagerViewDelegate {
         timelinePagerView.timelineScrollOffset
     }
     
-    private static let headerVisibleHeight: Double = 88
+    private static let headerVisibleHeight: Double = 64
     public var headerHeight: Double = headerVisibleHeight
     
     public var autoScrollToFirstEvent: Bool {
