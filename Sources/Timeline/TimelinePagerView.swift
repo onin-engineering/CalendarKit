@@ -219,6 +219,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
     /// - Parameter animated: if true, CalendarKit animates event creation
     public func create(event: EventDescriptor, animated: Bool) {
         let eventView = EventView()
+        eventView.updateAccessoryView()
         eventView.updateWithDescriptor(event: event)
         addSubview(eventView)
         // layout algo

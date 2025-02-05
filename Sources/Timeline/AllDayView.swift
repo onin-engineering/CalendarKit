@@ -163,6 +163,7 @@ public final class AllDayView: UIView {
             // create event
             let eventView = EventView(frame: CGRect.zero)
             eventView.updateWithDescriptor(event: anEventDescriptor)
+            eventView.updateAccessoryView()
             eventView.heightAnchor.constraint(equalToConstant: allDayEventHeight).isActive = true
 
             // create horz stack view if index % 2 == 0
