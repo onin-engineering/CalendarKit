@@ -148,7 +148,7 @@ open class EventView: UIView {
     let padding: Double = 8
     
     accessoryView.frame = CGRect(
-      x: bounds.maxX - accessoryViewSize.width - padding,  // Position from right with padding
+      x: bounds.maxX - accessoryViewSize.width - (padding / 2),
       y: 2,
       width: accessoryViewSize.width,
       height: accessoryViewSize.height
