@@ -50,7 +50,7 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
     }
 
     private func configure() {
-        [daySymbolsView, separator].forEach(addSubview)
+        [separator].forEach(addSubview)
         backgroundColor = style.backgroundColor
         configurePagingViewController()
     }
