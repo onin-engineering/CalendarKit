@@ -93,7 +93,7 @@ open class DayViewController: UIViewController, EventDataSource, DayViewDelegate
     open func dayViewDidTransitionCancel(dayView: CalendarDayView) {}
 
     open func dayView(dayView: CalendarDayView, willMoveTo date: Date) {}
-    open func dayView(dayView: CalendarDayView, didMoveTo date: Date) {}
+    open func dayView(didMoveTo date: Date) {}
 
     open func dayView(dayView: CalendarDayView, didLongPressTimelineAt date: Date) {}
     open func dayView(dayView: CalendarDayView, didUpdate event: EventDescriptor) {}
