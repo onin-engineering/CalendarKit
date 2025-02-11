@@ -2,7 +2,7 @@ import UIKit
 
 open class DayViewController: UIViewController, EventDataSource, DayViewDelegate {
   public var initialDate: Date = Date()
-  let tomorrow = Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: 1, to: Date())!)
+
   public lazy var dayView: CalendarDayView  = CalendarDayView(initialDate: initialDate)
 
     public var dataSource: EventDataSource? {
@@ -22,18 +22,7 @@ open class DayViewController: UIViewController, EventDataSource, DayViewDelegate
             dayView.delegate = value
         }
     }
-  
-  public func setInitialDate(_ date: Date) {
-//    dayView.setInitialDate(date)
-  }
-  
-//  public var selectedDate = Date() {
-//    didSet {
-//      for client in clients {
-//        client.move(from: selectedDate, to: selectedDate)
-//      }
-//    }
-//  }
+
 
     public var calendar = Calendar.autoupdatingCurrent {
         didSet {
