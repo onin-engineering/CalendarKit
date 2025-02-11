@@ -74,27 +74,30 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         }
     }
 
-    public init(calendar: Calendar) {
+  public init(calendar: Calendar, initialDate: Date = Date()) {
         self.calendar = calendar
         self.eventEditingSnappingBehavior = SnapTo15MinuteIntervals(calendar)
         super.init(frame: .zero)
+        print("🐛 initial date: \(initialDate)")
         configure()
     }
 
     override public init(frame: CGRect) {
+      print("🐛 init frame")
         self.eventEditingSnappingBehavior = SnapTo15MinuteIntervals(calendar)
         super.init(frame: frame)
         configure()
     }
 
     required public init?(coder aDecoder: NSCoder) {
+      print("🐛 init coder")
         self.eventEditingSnappingBehavior = SnapTo15MinuteIntervals(calendar)
         super.init(coder: aDecoder)
         configure()
     }
 
-    private func configure() {
-        let viewController = configureTimelineController(date: Date())
+  private func configure(initialDate: Date = Date()) {
+    let viewController = configureTimelineController(date: initialDate)
         pagingViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
         pagingViewController.dataSource = self
         pagingViewController.delegate = self
@@ -102,6 +105,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         addGestureRecognizer(panGestureRecognizer)
         panGestureRecognizer.delegate = self
     }
+
 
     public func updateStyle(_ newStyle: TimelineStyle) {
         style = newStyle
@@ -454,14 +458,14 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
             let direction: UIPageViewController.NavigationDirection = leftToRight ? .reverse : .forward
             pagingViewController.setViewControllers([newController],
                                                     direction: direction,
-                                                    animated: true,
+                                                    animated: true, // TODO: Don't animate on selectedDate change
                                                     completion: completionHandler(_:))
         } else if newDate > oldDate {
             let leftToRight = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .leftToRight
             let direction: UIPageViewController.NavigationDirection = leftToRight ? .forward : .reverse
             pagingViewController.setViewControllers([newController],
                                                     direction: direction,
-                                                    animated: true,
+                                                    animated: true, // TODO: Don't animate on selectedDate change
                                                     completion: completionHandler(_:))
         }
     }

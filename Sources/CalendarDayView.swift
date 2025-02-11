@@ -73,7 +73,7 @@ public class CalendarDayView: UIView, TimelinePagerViewDelegate {
     
     private var style = CalendarStyle()
     
-    public init(calendar: Calendar = Calendar.autoupdatingCurrent) {
+  public init(calendar: Calendar = Calendar.autoupdatingCurrent, initialDate: Date = Date()) {
         self.calendar = calendar
         self.dayHeaderView = DayHeaderView(calendar: calendar)
         self.timelinePagerView = TimelinePagerView(calendar: calendar)

@@ -34,14 +34,14 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
         return separator
     }()
 
-    public init(calendar: Calendar) {
+    public init(calendar: Calendar, initialDate: Date = Date()) {
         self.calendar = calendar
         let symbols = DaySymbolsView(calendar: calendar)
         let swipeLabel = SwipeLabelView(calendar: calendar)
         self.swipeLabelView = swipeLabel
         self.daySymbolsView = symbols
         super.init(frame: .zero)
-        configure()
+        configure(initialDate: initialDate)
     }
 
     @available(*, unavailable)
@@ -49,16 +49,19 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func configure() {
+    private func configure(initialDate: Date = Date()) {
         [daySymbolsView, separator].forEach(addSubview)
         backgroundColor = style.backgroundColor
-        configurePagingViewController()
+      print("🐛 configurePagingViewController - CONFGIRUE")
+
+        configurePagingViewController(initialDate: initialDate)
     }
 
-    private func configurePagingViewController() {
-        let selectedDate = Date()
-        let daySelectorController = makeSelectorController(startDate: beginningOfWeek(selectedDate))
-        daySelectorController.selectedDate = selectedDate
+    public func configurePagingViewController(initialDate: Date = Date()) {
+      print("🐛 configurePagingViewController - initial date: \(initialDate)")
+
+        let daySelectorController = makeSelectorController(startDate: beginningOfWeek(initialDate))
+        daySelectorController.selectedDate = initialDate
         currentWeekdayIndex = daySelectorController.selectedIndex
 
         let leftToRight = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .leftToRight
