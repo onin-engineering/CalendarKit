@@ -78,19 +78,16 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         self.calendar = calendar
         self.eventEditingSnappingBehavior = SnapTo15MinuteIntervals(calendar)
         super.init(frame: .zero)
-        print("🐛 initial date: \(initialDate)")
         configure()
     }
 
     override public init(frame: CGRect) {
-      print("🐛 init frame")
         self.eventEditingSnappingBehavior = SnapTo15MinuteIntervals(calendar)
         super.init(frame: frame)
         configure()
     }
 
     required public init?(coder aDecoder: NSCoder) {
-      print("🐛 init coder")
         self.eventEditingSnappingBehavior = SnapTo15MinuteIntervals(calendar)
         super.init(coder: aDecoder)
         configure()
@@ -223,7 +220,6 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
     /// - Parameter animated: if true, CalendarKit animates event creation
     public func create(event: EventDescriptor, animated: Bool) {
         let eventView = EventView()
-        eventView.updateAccessoryView()
         eventView.updateWithDescriptor(event: event)
         addSubview(eventView)
         // layout algo
@@ -249,7 +245,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
                                  width: timeline.calendarWidth,
                                  height: yEnd - yStart)
             eventView.frame = newRect
-
+            eventView.updateAccessoryView()
             if animated {
                 eventView.animateCreation()
             }

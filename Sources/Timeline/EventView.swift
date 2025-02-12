@@ -1,7 +1,7 @@
 import UIKit
 
 open class EventView: UIView {
-  let accessoryViewWidth: CGFloat = 58
+  let accessoryViewWidth: CGFloat = 50
   
   public var descriptor: EventDescriptor?
   public var color = SystemColors.label
@@ -13,14 +13,13 @@ open class EventView: UIView {
   public private(set) lazy var textView: UITextView = {
     let view = UITextView()
     view.isUserInteractionEnabled = false
-    view.backgroundColor = .clear
     view.isScrollEnabled = false
     view.clipsToBounds = true
     return view
   }()
   
   public private(set) lazy var accessoryView: UIView = {
-    let view = UIView(frame: CGRect(x: 0, y: 0, width: accessoryViewWidth, height: 20))
+    let view = UIView(frame: CGRect(x: 0, y: 0, width: accessoryViewWidth, height: 24))
     view.layer.cornerRadius = 2
     view.isUserInteractionEnabled = false
     view.clipsToBounds = true
@@ -29,9 +28,15 @@ open class EventView: UIView {
   
   func updateAccessoryView() {
     if let view = descriptor?.accessoryView {
+      addSubview(accessoryView)
       accessoryView.subviews.forEach { $0.removeFromSuperview() }
       accessoryView.addSubview(view)
-      view.frame = accessoryView.bounds
+      view.frame = CGRect(
+        x: accessoryView.bounds.minX,
+        y: accessoryView.bounds.minY,
+        width: accessoryView.bounds.width,
+        height: accessoryView.bounds.height > 24 ? 24 : accessoryView.bounds.height
+      )
       setNeedsDisplay()
       setNeedsLayout()
     }
@@ -44,20 +49,17 @@ open class EventView: UIView {
   override public init(frame: CGRect) {
     super.init(frame: frame)
     configure()
-    updateAccessoryView()
   }
   
   required public init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
     configure()
-    updateAccessoryView()
   }
   
   private func configure() {
-    clipsToBounds = false
+    clipsToBounds = true
     color = tintColor
     addSubview(textView)
-    addSubview(accessoryView)
     
     for (idx, handle) in eventResizeHandles.enumerated() {
       handle.tag = idx
@@ -65,9 +67,11 @@ open class EventView: UIView {
     }
   }
   
+  
   public func updateWithDescriptor(event: EventDescriptor) {
     if let attributedText = event.attributedText {
       textView.attributedText = attributedText
+      textView.textContainer.lineBreakMode = .byCharWrapping
       textView.setNeedsLayout()
     } else {
       textView.text = event.text
@@ -138,18 +142,18 @@ open class EventView: UIView {
     let adjustedWidth = descriptor?.accessoryView == nil ? 0 : (accessoryViewWidth + 8)
     textView.frame = {
       if UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .rightToLeft {
-        return CGRect(x: bounds.minX, y: bounds.minY - 3, width: bounds.width - 3, height: bounds.height)
+        return CGRect(x: bounds.minX, y: bounds.minY - 0, width: bounds.width - 3, height: bounds.height)
       } else {
-        return CGRect(x: bounds.minX + 5, y: bounds.minY - 3, width: bounds.width - adjustedWidth - 6, height: bounds.height)
+        return CGRect(x: bounds.minX + 5, y: bounds.minY - 0, width: bounds.width - adjustedWidth, height: bounds.height)
       }
     }()
     
-    let accessoryViewSize: CGSize = CGSize(width: accessoryViewWidth, height: 20) // Ensure a valid size
+    let accessoryViewSize: CGSize = CGSize(width: accessoryViewWidth, height: bounds.height) // Ensure a valid size
     let padding: Double = 8
     
     accessoryView.frame = CGRect(
       x: bounds.maxX - accessoryViewSize.width - (padding / 2),
-      y: 2,
+      y: 0,
       width: accessoryViewSize.width,
       height: accessoryViewSize.height
     )

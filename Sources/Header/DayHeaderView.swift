@@ -52,14 +52,10 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
     private func configure(initialDate: Date = Date()) {
         [separator].forEach(addSubview)
         backgroundColor = style.backgroundColor
-      print("🐛 configurePagingViewController - CONFGIRUE")
-
         configurePagingViewController(initialDate: initialDate)
     }
 
     public func configurePagingViewController(initialDate: Date = Date()) {
-      print("🐛 configurePagingViewController - initial date: \(initialDate)")
-
         let daySelectorController = makeSelectorController(startDate: beginningOfWeek(initialDate))
         daySelectorController.selectedDate = initialDate
         currentWeekdayIndex = daySelectorController.selectedIndex

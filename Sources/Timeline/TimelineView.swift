@@ -406,10 +406,17 @@ public final class TimelineView: UIView {
                 x = attributes.frame.minX
             }
 
+            let height = attributes.frame.height
+          let minHeight: Double = style.verticalDiff / 4
+          let actualHeight = height < minHeight ? minHeight : height
+          
+          print("🐛 height: \(height)")
+          print("🐛 actualHeight: \(actualHeight)")
+          
             eventView.frame = CGRect(x: x,
                                      y: attributes.frame.minY,
                                      width: attributes.frame.width - style.eventGap,
-                                     height: attributes.frame.height - style.eventGap)
+                                     height: actualHeight - style.eventGap)
             eventView.updateAccessoryView()
             eventView.updateWithDescriptor(event: descriptor)
         }
