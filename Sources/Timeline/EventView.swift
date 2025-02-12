@@ -13,6 +13,7 @@ open class EventView: UIView {
   public private(set) lazy var textView: UITextView = {
     let view = UITextView()
     view.isUserInteractionEnabled = false
+    view.backgroundColor = .clear
     view.isScrollEnabled = false
     view.clipsToBounds = true
     return view
