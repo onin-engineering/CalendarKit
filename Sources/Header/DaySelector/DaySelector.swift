@@ -63,20 +63,20 @@ public final class DaySelector: UIView {
         self.startDate = startDate.dateOnly(calendar: calendar)
         self.daysInWeek = daysInWeek
         super.init(frame: CGRect.zero)
-        initializeViews(viewType: DateLabel.self)
+        initializeViews(viewType: DateDotView.self)
         configure()
     }
     
     override public init(frame: CGRect) {
         startDate = Date().dateOnly(calendar: calendar)
         super.init(frame: frame)
-        initializeViews(viewType: DateLabel.self)
+        initializeViews(viewType: DateDotView.self)
     }
     
     required public init?(coder aDecoder: NSCoder) {
         startDate = Date().dateOnly(calendar: calendar)
         super.init(coder: aDecoder)
-        initializeViews(viewType: DateLabel.self)
+        initializeViews(viewType: DateDotView.self)
     }
     
     private func initializeViews<T: UIView>(viewType: T.Type) where T: DaySelectorItemProtocol {
@@ -152,7 +152,7 @@ public final class DaySelector: UIView {
         case .regular:
             initializeViews(viewType: DayDateCell.self)
         default:
-            initializeViews(viewType: DateLabel.self)
+            initializeViews(viewType: DateDotView.self)
         }
     }
     

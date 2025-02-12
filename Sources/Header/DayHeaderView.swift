@@ -20,7 +20,7 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
     private var currentWeekdayIndex = -1
 
     private var daySymbolsViewHeight: Double = 20
-    private var pagingScrollViewHeight: Double = 40
+    private var pagingScrollViewHeight: Double = 44
     private var swipeLabelViewHeight: Double = 20
 
     private let daySymbolsView: DaySymbolsView
