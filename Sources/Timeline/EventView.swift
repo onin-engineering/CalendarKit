@@ -1,14 +1,20 @@
 import UIKit
 
 open class EventView: UIView {
-  let accessoryViewWidth: CGFloat = 50
-  
   public var descriptor: EventDescriptor?
   public var color = SystemColors.label
   
   public var contentHeight: Double {
     textView.frame.height
   }
+  
+  public private(set) lazy var stackView: UIStackView = {
+    let stackView = UIStackView()
+    stackView.axis = .horizontal
+    stackView.distribution = .fill
+    stackView.spacing = 0
+    return stackView
+  }()
   
   public private(set) lazy var textView: UITextView = {
     let view = UITextView()
@@ -19,25 +25,9 @@ open class EventView: UIView {
     return view
   }()
   
-  public private(set) lazy var accessoryView: UIView = {
-    let view = UIView(frame: CGRect(x: 0, y: 0, width: accessoryViewWidth, height: 24))
-    view.layer.cornerRadius = 2
-    view.isUserInteractionEnabled = false
-    view.clipsToBounds = true
-    return view
-  }()
-  
   func updateAccessoryView() {
     if let view = descriptor?.accessoryView {
-      addSubview(accessoryView)
-      accessoryView.subviews.forEach { $0.removeFromSuperview() }
-      accessoryView.addSubview(view)
-      view.frame = CGRect(
-        x: accessoryView.bounds.minX,
-        y: accessoryView.bounds.minY,
-        width: accessoryView.bounds.width,
-        height: accessoryView.bounds.height > 24 ? 24 : accessoryView.bounds.height
-      )
+      stackView.addArrangedSubview(view)
       setNeedsDisplay()
       setNeedsLayout()
     }
@@ -60,7 +50,8 @@ open class EventView: UIView {
   private func configure() {
     clipsToBounds = true
     color = tintColor
-    addSubview(textView)
+    addSubview(stackView)
+    stackView.addArrangedSubview(textView)
     
     for (idx, handle) in eventResizeHandles.enumerated() {
       handle.tag = idx
@@ -72,7 +63,6 @@ open class EventView: UIView {
   public func updateWithDescriptor(event: EventDescriptor) {
     if let attributedText = event.attributedText {
       textView.attributedText = attributedText
-      textView.textContainer.lineBreakMode = .byCharWrapping
       textView.setNeedsLayout()
     } else {
       textView.text = event.text
@@ -140,24 +130,8 @@ open class EventView: UIView {
   
   override open func layoutSubviews() {
     super.layoutSubviews()
-    let adjustedWidth = descriptor?.accessoryView == nil ? 0 : (accessoryViewWidth + 8)
-    textView.frame = {
-      if UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .rightToLeft {
-        return CGRect(x: bounds.minX, y: bounds.minY - 0, width: bounds.width - 3, height: bounds.height)
-      } else {
-        return CGRect(x: bounds.minX + 5, y: bounds.minY - 0, width: bounds.width - adjustedWidth, height: bounds.height)
-      }
-    }()
     
-    let accessoryViewSize: CGSize = CGSize(width: accessoryViewWidth, height: bounds.height) // Ensure a valid size
-    let padding: Double = 8
-    
-    accessoryView.frame = CGRect(
-      x: bounds.maxX - accessoryViewSize.width - (padding / 2),
-      y: 0,
-      width: accessoryViewSize.width,
-      height: accessoryViewSize.height
-    )
+    stackView.frame = CGRect(x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height)
     
     
     if frame.minY < 0 {
@@ -165,11 +139,6 @@ open class EventView: UIView {
       textFrame.origin.y = frame.minY * -1;
       textFrame.size.height += frame.minY;
       textView.frame = textFrame;
-      
-      var accessoryFrame = accessoryView.frame;
-      accessoryFrame.origin.y = frame.minY * -1;
-      accessoryFrame.size.height += frame.minY;
-      accessoryView.frame = accessoryFrame;
     }
     
     let first = eventResizeHandles.first
