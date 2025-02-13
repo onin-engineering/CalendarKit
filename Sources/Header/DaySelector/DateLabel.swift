@@ -1,6 +1,8 @@
 import UIKit
 
 public final class DateLabel: UILabel, DaySelectorItemProtocol {
+  public var events: [any EventDescriptor] = []
+  
     public var calendar = Calendar.autoupdatingCurrent {
         didSet {
             updateState()

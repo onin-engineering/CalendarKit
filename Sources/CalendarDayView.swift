@@ -19,6 +19,7 @@ public class CalendarDayView: UIView, TimelinePagerViewDelegate {
         }
         set(value) {
             timelinePagerView.dataSource = value
+            dayHeaderView.dataSource = value  
         }
     }
     
@@ -145,6 +146,7 @@ public class CalendarDayView: UIView, TimelinePagerViewDelegate {
     
     public func reloadData() {
         timelinePagerView.reloadData()
+        dayHeaderView.reloadData()
     }
     
     public func move(to date: Date) {

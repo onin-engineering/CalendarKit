@@ -16,10 +16,28 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
             swipeLabelView.state = state
         }
     }
+  
+  public weak var dataSource: EventDataSource? {
+    didSet {
+      pagingViewController.viewControllers?.forEach({ viewController in
+        if let selector = viewController as? DaySelectorController {
+          selector.dataSource = dataSource
+        }
+      })
+    }
+  }
+  
+  public func reloadData() {
+    pagingViewController.viewControllers?.forEach({ viewController in
+      if let selector = viewController as? DaySelectorController {
+        selector.reloadData()
+      }
+    })
+  }
 
     private var currentWeekdayIndex = -1
 
-    private var daySymbolsViewHeight: Double = 20
+    private var daySymbolsViewHeight: Double = 18
     private var pagingScrollViewHeight: Double = 44
     private var swipeLabelViewHeight: Double = 20
 
@@ -76,6 +94,8 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
         daySelectorController.updateStyle(style.daySelector)
         daySelectorController.startDate = startDate
         daySelectorController.delegate = self
+        daySelectorController.dataSource = dataSource
+        daySelectorController.reloadData()
         return daySelectorController
     }
 

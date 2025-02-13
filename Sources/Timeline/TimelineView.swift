@@ -407,11 +407,8 @@ public final class TimelineView: UIView {
             }
 
             let height = attributes.frame.height
-          let minHeight: Double = style.verticalDiff / 4
-          let actualHeight = height < minHeight ? minHeight : height
-          
-          print("🐛 height: \(height)")
-          print("🐛 actualHeight: \(actualHeight)")
+            let minHeight: Double = style.verticalDiff / 4
+            let actualHeight = height < minHeight ? minHeight : height
           
             eventView.frame = CGRect(x: x,
                                      y: attributes.frame.minY,
