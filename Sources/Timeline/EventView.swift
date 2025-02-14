@@ -9,11 +9,13 @@ open class EventView: UIView {
   }
   
   public private(set) lazy var stackView: UIStackView = {
-    let stackView = UIStackView()
-    stackView.axis = .horizontal
-    stackView.distribution = .fill
-    stackView.spacing = 0
-    return stackView
+    let sv = UIStackView()
+    sv.axis = .horizontal
+    sv.distribution = .fill
+    sv.alignment = .top
+    sv.spacing = 1
+    sv.clipsToBounds = true
+    return sv
   }()
   
   public private(set) lazy var textView: UITextView = {
@@ -26,11 +28,11 @@ open class EventView: UIView {
   }()
   
   func updateAccessoryView() {
-    if let view = descriptor?.accessoryView {
-      stackView.addArrangedSubview(view)
-      setNeedsDisplay()
+      guard let accessory = descriptor?.accessoryView else { return }
+      stackView.addArrangedSubview(accessory)
+    
       setNeedsLayout()
-    }
+      setNeedsDisplay()
   }
   
   /// Resize Handle views showing up when editing the event.
@@ -131,7 +133,10 @@ open class EventView: UIView {
   override open func layoutSubviews() {
     super.layoutSubviews()
     
-    stackView.frame = CGRect(x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height)
+    stackView.frame = CGRect(x: bounds.minX,
+                             y: bounds.minY,
+                             width: bounds.width - 3,
+                             height: bounds.height)
     
     
     if frame.minY < 0 {
