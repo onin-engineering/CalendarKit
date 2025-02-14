@@ -28,6 +28,9 @@ open class EventView: UIView {
   }()
   
   func updateAccessoryView() {
+    if stackView.arrangedSubviews.count > 1 {
+      stackView.arrangedSubviews.last?.removeFromSuperview()
+    }
       guard let accessory = descriptor?.accessoryView else { return }
       stackView.addArrangedSubview(accessory)
     
