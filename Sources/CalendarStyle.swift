@@ -72,7 +72,7 @@ public struct TimelineStyle {
     public var verticalDiff: Double = 50
     public var verticalInset: Double = 10
     public var leadingInset: Double = 53
-    public var eventGap: Double = 0
+    public var eventGap: Double = 2
     public init() {}
 }
 
