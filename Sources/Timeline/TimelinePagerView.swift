@@ -15,6 +15,7 @@ public protocol TimelinePagerViewDelegate: AnyObject {
 }
 
 public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, DayViewStateUpdating, UIPageViewControllerDataSource, UIPageViewControllerDelegate, TimelineViewDelegate {
+  
 
     public weak var dataSource: EventDataSource?
     public weak var delegate: TimelinePagerViewDelegate?
@@ -101,6 +102,10 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         addSubview(pagingViewController.view!)
         addGestureRecognizer(panGestureRecognizer)
         panGestureRecognizer.delegate = self
+        viewController.viewDidLayout = { [weak self] in
+          let hour = self?.calendar.component(.hour, from: Date()) ?? 0
+          self?.scrollTo(hour24: Float(hour), animated: false)
+        }
     }
 
 
@@ -424,10 +429,17 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
 
     // MARK: DayViewStateUpdating
 
-    public func move(from oldDate: Date, to newDate: Date) {
+  public func move(from oldDate: Date, to newDate: Date, scrollToNow: Bool) {
         let oldDate = oldDate.dateOnly(calendar: calendar)
         let newDate = newDate.dateOnly(calendar: calendar)
         let newController = configureTimelineController(date: newDate)
+      
+      newController.viewDidLayout = { [weak self] in
+        if scrollToNow {
+          let hour = self?.calendar.component(.hour, from: Date()) ?? 0
+          self?.scrollTo(hour24: Float(hour), animated: false)
+        }
+      }
 
         delegate?.timelinePager(timelinePager: self, willMoveTo: newDate)
 

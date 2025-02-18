@@ -149,7 +149,7 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
 
     // MARK: DayViewStateUpdating
 
-    public func move(from oldDate: Date, to newDate: Date) {
+  public func move(from oldDate: Date, to newDate: Date, scrollToNow: Bool) {
         let newDate = newDate.dateOnly(calendar: calendar)
 
         let centerView = pagingViewController.viewControllers![0] as! DaySelectorController

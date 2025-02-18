@@ -104,7 +104,7 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
 
     // MARK: DayViewStateUpdating
 
-    public func move(from oldDate: Date, to newDate: Date) {
+  public func move(from oldDate: Date, to newDate: Date, scrollToNow: Bool) {
         guard newDate != oldDate else {
             return
         }
