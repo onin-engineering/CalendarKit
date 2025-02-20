@@ -486,16 +486,21 @@ public final class TimelineView: UIView {
 
         groupsOfEvents.append(overlappingEvents)
         overlappingEvents.removeAll()
-
+        
+        let fullTimelineHeight = 24 * style.verticalDiff
+      
         for overlappingEvents in groupsOfEvents {
             let totalCount = Double(overlappingEvents.count)
             for (index, event) in overlappingEvents.enumerated() {
+                // Updated to end events at 00:00 and start events at 00:00 for multi day events
                 let startY = dateToY(event.descriptor.dateInterval.start)
+                let adjustedStartY = startY < 0 ? 0 : startY
                 let endY = dateToY(event.descriptor.dateInterval.end)
+                let adjustedEndY = endY > fullTimelineHeight ? (fullTimelineHeight + (style.verticalDiff / 4)) : endY
                 let floatIndex = Double(index)
                 let x = style.leadingInset + floatIndex / totalCount * calendarWidth
                 let equalWidth = calendarWidth / totalCount
-                event.frame = CGRect(x: x, y: startY, width: equalWidth, height: endY - startY)
+                event.frame = CGRect(x: x, y: adjustedStartY, width: equalWidth, height: adjustedEndY - adjustedStartY)
             }
         }
     }
