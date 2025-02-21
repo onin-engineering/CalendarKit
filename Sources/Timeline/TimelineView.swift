@@ -548,7 +548,7 @@ public final class TimelineView: UIView {
               let startY = dateToY(ev.descriptor.dateInterval.start)
               let endY   = dateToY(ev.descriptor.dateInterval.end)
               let adjustedStartY = max(0, startY)
-              let adjustedEndY   = min(fullTimelineHeight, endY)
+              let adjustedEndY = min(fullTimelineHeight + (style.verticalDiff / 4), endY)
 
               ev.frame = CGRect(
                   x: xPos,
