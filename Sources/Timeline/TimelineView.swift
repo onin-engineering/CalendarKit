@@ -439,112 +439,127 @@ public final class TimelineView: UIView {
 
   private func recalculateEventLayout() {
       // 1) Sort all events by start time
-      let sortedEvents = self.regularLayoutAttributes.sorted {
+      let sortedEvents = regularLayoutAttributes.sorted {
           $0.descriptor.dateInterval.start < $1.descriptor.dateInterval.start
       }
 
-      // 2) Build groups by “concurrency bridging”
+      // 2) Build groups
       var groups = [[EventLayoutAttributes]]()
       var currentGroup = [EventLayoutAttributes]()
-      
-      for event in sortedEvents {
-          let start = event.descriptor.dateInterval.start
+      var currentGroupMaxEnd: Date?
+
+      for ev in sortedEvents {
+          let evStart = ev.descriptor.dateInterval.start
+          let evEnd   = ev.descriptor.dateInterval.end
           
           if currentGroup.isEmpty {
-              // Start a new group
-              currentGroup.append(event)
+              currentGroup = [ev]
+              currentGroupMaxEnd = evEnd
           } else {
-              // Get the latest end in the current group
-              let groupMaxEnd = currentGroup
-                  .map { $0.descriptor.dateInterval.end }
-                  .max()!
-              
-              // Check overlap: if new event starts BEFORE groupMaxEnd, we treat it as overlapping
-              // If you consider "end == start" as NO overlap, do (start < groupMaxEnd)
-              // If you consider "end == start" as overlapping, do (start <= groupMaxEnd)
-              if start < groupMaxEnd {
-                  // Overlaps => same group
-                  currentGroup.append(event)
+              if evStart < currentGroupMaxEnd! {
+                  // Overlaps => belongs in the same group
+                  currentGroup.append(ev)
+                  if evEnd > currentGroupMaxEnd! {
+                      currentGroupMaxEnd = evEnd
+                  }
               } else {
-                  // No overlap => finalize this group, start a new one
+                  // No overlap => finalize this group
                   groups.append(currentGroup)
-                  currentGroup = [event]
+                  // Start a new group
+                  currentGroup = [ev]
+                  currentGroupMaxEnd = evEnd
               }
           }
       }
-      // Add the last group if non-empty
       if !currentGroup.isEmpty {
           groups.append(currentGroup)
       }
 
-      // 3) For each group, do a column-based layout
-      //    So that within that group, truly overlapping events get separate columns,
-      //    but non-overlapping events can share.
-      
-      let fullTimelineHeight = 24 * style.verticalDiff
-      
+      // 3) For each group, do a min-heap column assignment
       for group in groups {
-          
-          // Sort events in the group by start time
-          let groupSorted = group.sorted {
-              $0.descriptor.dateInterval.start < $1.descriptor.dateInterval.start
-          }
-          
-          // columns[i] = array of events that occupy column i
-          var columns = [[EventLayoutAttributes]]()
-          
-          for ev in groupSorted {
-              let evStart = ev.descriptor.dateInterval.start
-              let evEnd   = ev.descriptor.dateInterval.end
-              
-              var placed = false
-              
-              // Try to reuse an existing column if the event doesn't overlap
-              for colIndex in 0..<columns.count {
-                  if let lastInCol = columns[colIndex].last {
-                      let lastEnd = lastInCol.descriptor.dateInterval.end
-                      // If we treat "end == start" as not overlapping, use <=
-                      if lastEnd <= evStart {
-                          // No overlap => can reuse this column
-                          columns[colIndex].append(ev)
-                          placed = true
-                          break
-                      }
-                  }
-              }
-              
-              // If we didn't find a free column, make a new one
-              if !placed {
-                  columns.append([ev])
-              }
-          }
-          
-          // Now we know how many columns for this group
-          let totalColumns = CGFloat(columns.count)
-          let columnWidth = calendarWidth / totalColumns
+          let columns = layoutGroupWithMinHeap(group)
+          // columns[i] is an array of events that share column i
+          // now assign frames...
+          layoutColumns(columns)
+      }
+  }
 
-          // 4) Assign frames
-          // In this style, each event in a group always keeps
-          // the same horizontal column offset for its entire duration.
-          // i.e., if an event is in column 0, it stays on the left half/third/etc.
-          
-          for (colIndex, col) in columns.enumerated() {
-              for ev in col {
-                  let startY = dateToY(ev.descriptor.dateInterval.start)
-                  let endY   = dateToY(ev.descriptor.dateInterval.end)
-                  
-                  let adjustedStartY = max(0, startY)
-                  let adjustedEndY = min(fullTimelineHeight + (style.verticalDiff / 4), endY)
-                  
-                  let xPos  = style.leadingInset + columnWidth * CGFloat(colIndex)
-                  let height = adjustedEndY - adjustedStartY
-                  
-                  ev.frame = CGRect(x: xPos, y: adjustedStartY,
-                                    width: columnWidth, height: height)
+  private func layoutGroupWithMinHeap(_ group: [EventLayoutAttributes])
+  -> [[EventLayoutAttributes]]
+  {
+      // Sort by start
+      let sortedGroup = group.sorted {
+          $0.descriptor.dateInterval.start < $1.descriptor.dateInterval.start
+      }
+      
+      var columns = [[EventLayoutAttributes]]()
+      // min-heap of (endTime, columnIndex)
+      var minHeap = [(Date, Int)]()
+
+      func heapPop() -> (Date, Int)? {
+          guard !minHeap.isEmpty else { return nil }
+          minHeap.sort { $0.0 < $1.0 }
+          return minHeap.removeFirst()
+      }
+      func heapPush(_ item: (Date, Int)) {
+          minHeap.append(item)
+      }
+
+      for ev in sortedGroup {
+          let start = ev.descriptor.dateInterval.start
+          let end   = ev.descriptor.dateInterval.end
+
+          if var top = heapPop() {
+              if top.0 <= start {
+                  // Reuse this column
+                  columns[top.1].append(ev)
+                  // Update endTime
+                  top.0 = end
+                  heapPush(top)
+              } else {
+                  // That column is still active
+                  // put it back
+                  heapPush(top)
+                  // new column
+                  let newIndex = columns.count
+                  columns.append([ev])
+                  heapPush((end, newIndex))
               }
+          } else {
+              // no columns
+              let newIndex = columns.count
+              columns.append([ev])
+              heapPush((end, newIndex))
+          }
+      }
+
+      return columns
+  }
+
+  private func layoutColumns(_ columns: [[EventLayoutAttributes]]) {
+      // Each group is laid out side-by-side with as many columns as concurrency requires
+      let totalColumns = CGFloat(columns.count)
+      let colWidth = calendarWidth / totalColumns
+      let fullTimelineHeight = 24 * style.verticalDiff
+
+      for (index, col) in columns.enumerated() {
+          let xPos = style.leadingInset + colWidth * CGFloat(index)
+          for ev in col {
+              let startY = dateToY(ev.descriptor.dateInterval.start)
+              let endY   = dateToY(ev.descriptor.dateInterval.end)
+              let adjustedStartY = max(0, startY)
+              let adjustedEndY   = min(fullTimelineHeight, endY)
+
+              ev.frame = CGRect(
+                  x: xPos,
+                  y: adjustedStartY,
+                  width: colWidth,
+                  height: adjustedEndY - adjustedStartY
+              )
           }
       }
   }
+
 
 
     private func prepareEventViews() {
