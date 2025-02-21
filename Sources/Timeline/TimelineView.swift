@@ -437,73 +437,115 @@ public final class TimelineView: UIView {
         }
     }
 
-    private func recalculateEventLayout() {
+  private func recalculateEventLayout() {
+      // 1) Sort all events by start time
+      let sortedEvents = self.regularLayoutAttributes.sorted {
+          $0.descriptor.dateInterval.start < $1.descriptor.dateInterval.start
+      }
 
-        // only non allDay events need their frames to be set
-        let sortedEvents = self.regularLayoutAttributes.sorted { (attr1, attr2) -> Bool in
-            let start1 = attr1.descriptor.dateInterval.start
-            let start2 = attr2.descriptor.dateInterval.start
-            return start1 < start2
-        }
-
-        var groupsOfEvents = [[EventLayoutAttributes]]()
-        var overlappingEvents = [EventLayoutAttributes]()
-
-        for event in sortedEvents {
-            if overlappingEvents.isEmpty {
-                overlappingEvents.append(event)
-                continue
-            }
-
-            let longestEvent = overlappingEvents.sorted { (attr1, attr2) -> Bool in
-                var period = attr1.descriptor.dateInterval
-                let period1 = period.end.timeIntervalSince(period.start)
-                period = attr2.descriptor.dateInterval
-                let period2 = period.end.timeIntervalSince(period.start)
-
-                return period1 > period2
-            }
-                .first!
-
-            if style.eventsWillOverlap {
-                guard let earliestEvent = overlappingEvents.first?.descriptor.dateInterval.start else { continue }
-                let dateInterval = getDateInterval(date: earliestEvent)
-                if event.descriptor.dateInterval.contains(dateInterval.start) {
-                    overlappingEvents.append(event)
-                    continue
-                }
-            } else {
-                let lastEvent = overlappingEvents.last!
-                if (longestEvent.descriptor.dateInterval.intersects(event.descriptor.dateInterval) && (longestEvent.descriptor.dateInterval.end != event.descriptor.dateInterval.start || style.eventGap <= 0.0)) ||
-                    (lastEvent.descriptor.dateInterval.intersects(event.descriptor.dateInterval) && (lastEvent.descriptor.dateInterval.end != event.descriptor.dateInterval.start || style.eventGap <= 0.0)) {
-                    overlappingEvents.append(event)
-                    continue
-                }
-            }
-            groupsOfEvents.append(overlappingEvents)
-            overlappingEvents = [event]
-        }
-
-        groupsOfEvents.append(overlappingEvents)
-        overlappingEvents.removeAll()
-        
-        let fullTimelineHeight = 24 * style.verticalDiff
+      // 2) Build groups by “concurrency bridging”
+      var groups = [[EventLayoutAttributes]]()
+      var currentGroup = [EventLayoutAttributes]()
       
-        for overlappingEvents in groupsOfEvents {
-            let totalCount = Double(overlappingEvents.count)
-            for (index, event) in overlappingEvents.enumerated() {
-                // Updated to end events at 00:00 and start events at 00:00 for multi day events
-                let startY = dateToY(event.descriptor.dateInterval.start)
-                let adjustedStartY = startY < 0 ? 0 : startY
-                let endY = dateToY(event.descriptor.dateInterval.end)
-                let adjustedEndY = endY > fullTimelineHeight ? (fullTimelineHeight + (style.verticalDiff / 4)) : endY
-                let floatIndex = Double(index)
-                let x = style.leadingInset + floatIndex / totalCount * calendarWidth
-                let equalWidth = calendarWidth / totalCount
-                event.frame = CGRect(x: x, y: adjustedStartY, width: equalWidth, height: adjustedEndY - adjustedStartY)
-            }
-        }
-    }
+      for event in sortedEvents {
+          let start = event.descriptor.dateInterval.start
+          
+          if currentGroup.isEmpty {
+              // Start a new group
+              currentGroup.append(event)
+          } else {
+              // Get the latest end in the current group
+              let groupMaxEnd = currentGroup
+                  .map { $0.descriptor.dateInterval.end }
+                  .max()!
+              
+              // Check overlap: if new event starts BEFORE groupMaxEnd, we treat it as overlapping
+              // If you consider "end == start" as NO overlap, do (start < groupMaxEnd)
+              // If you consider "end == start" as overlapping, do (start <= groupMaxEnd)
+              if start < groupMaxEnd {
+                  // Overlaps => same group
+                  currentGroup.append(event)
+              } else {
+                  // No overlap => finalize this group, start a new one
+                  groups.append(currentGroup)
+                  currentGroup = [event]
+              }
+          }
+      }
+      // Add the last group if non-empty
+      if !currentGroup.isEmpty {
+          groups.append(currentGroup)
+      }
+
+      // 3) For each group, do a column-based layout
+      //    So that within that group, truly overlapping events get separate columns,
+      //    but non-overlapping events can share.
+      
+      let fullTimelineHeight = 24 * style.verticalDiff
+      
+      for group in groups {
+          
+          // Sort events in the group by start time
+          let groupSorted = group.sorted {
+              $0.descriptor.dateInterval.start < $1.descriptor.dateInterval.start
+          }
+          
+          // columns[i] = array of events that occupy column i
+          var columns = [[EventLayoutAttributes]]()
+          
+          for ev in groupSorted {
+              let evStart = ev.descriptor.dateInterval.start
+              let evEnd   = ev.descriptor.dateInterval.end
+              
+              var placed = false
+              
+              // Try to reuse an existing column if the event doesn't overlap
+              for colIndex in 0..<columns.count {
+                  if let lastInCol = columns[colIndex].last {
+                      let lastEnd = lastInCol.descriptor.dateInterval.end
+                      // If we treat "end == start" as not overlapping, use <=
+                      if lastEnd <= evStart {
+                          // No overlap => can reuse this column
+                          columns[colIndex].append(ev)
+                          placed = true
+                          break
+                      }
+                  }
+              }
+              
+              // If we didn't find a free column, make a new one
+              if !placed {
+                  columns.append([ev])
+              }
+          }
+          
+          // Now we know how many columns for this group
+          let totalColumns = CGFloat(columns.count)
+          let columnWidth = calendarWidth / totalColumns
+
+          // 4) Assign frames
+          // In this style, each event in a group always keeps
+          // the same horizontal column offset for its entire duration.
+          // i.e., if an event is in column 0, it stays on the left half/third/etc.
+          
+          for (colIndex, col) in columns.enumerated() {
+              for ev in col {
+                  let startY = dateToY(ev.descriptor.dateInterval.start)
+                  let endY   = dateToY(ev.descriptor.dateInterval.end)
+                  
+                  let adjustedStartY = max(0, startY)
+                  let adjustedEndY = min(fullTimelineHeight + (style.verticalDiff / 4), endY)
+                  
+                  let xPos  = style.leadingInset + columnWidth * CGFloat(colIndex)
+                  let height = adjustedEndY - adjustedStartY
+                  
+                  ev.frame = CGRect(x: xPos, y: adjustedStartY,
+                                    width: columnWidth, height: height)
+              }
+          }
+      }
+  }
+
 
     private func prepareEventViews() {
         pool.enqueue(views: eventViews)
