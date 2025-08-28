@@ -15,6 +15,7 @@ public protocol TimelinePagerViewDelegate: AnyObject {
 }
 
 public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, DayViewStateUpdating, UIPageViewControllerDataSource, UIPageViewControllerDelegate, TimelineViewDelegate {
+  
 
     public weak var dataSource: EventDataSource?
     public weak var delegate: TimelinePagerViewDelegate?
@@ -74,7 +75,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         }
     }
 
-    public init(calendar: Calendar) {
+  public init(calendar: Calendar, initialDate: Date = Date()) {
         self.calendar = calendar
         self.eventEditingSnappingBehavior = SnapTo15MinuteIntervals(calendar)
         super.init(frame: .zero)
@@ -93,15 +94,20 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         configure()
     }
 
-    private func configure() {
-        let viewController = configureTimelineController(date: Date())
+  private func configure(initialDate: Date = Date()) {
+    let viewController = configureTimelineController(date: initialDate)
         pagingViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
         pagingViewController.dataSource = self
         pagingViewController.delegate = self
         addSubview(pagingViewController.view!)
         addGestureRecognizer(panGestureRecognizer)
         panGestureRecognizer.delegate = self
+        viewController.viewDidLayout = { [weak self] in
+          let hour = self?.calendar.component(.hour, from: Date()) ?? 0
+          self?.scrollTo(hour24: Float(hour), animated: false)
+        }
     }
+
 
     public func updateStyle(_ newStyle: TimelineStyle) {
         style = newStyle
@@ -219,7 +225,6 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
     /// - Parameter animated: if true, CalendarKit animates event creation
     public func create(event: EventDescriptor, animated: Bool) {
         let eventView = EventView()
-        eventView.updateAccessoryView()
         eventView.updateWithDescriptor(event: event)
         addSubview(eventView)
         // layout algo
@@ -245,7 +250,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
                                  width: timeline.calendarWidth,
                                  height: yEnd - yStart)
             eventView.frame = newRect
-
+            eventView.updateAccessoryView()
             if animated {
                 eventView.animateCreation()
             }
@@ -424,10 +429,17 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
 
     // MARK: DayViewStateUpdating
 
-    public func move(from oldDate: Date, to newDate: Date) {
+  public func move(from oldDate: Date, to newDate: Date, scrollToNow: Bool) {
         let oldDate = oldDate.dateOnly(calendar: calendar)
         let newDate = newDate.dateOnly(calendar: calendar)
         let newController = configureTimelineController(date: newDate)
+      
+      newController.viewDidLayout = { [weak self] in
+        if scrollToNow {
+          let hour = self?.calendar.component(.hour, from: Date()) ?? 0
+          self?.scrollTo(hour24: Float(hour), animated: false)
+        }
+      }
 
         delegate?.timelinePager(timelinePager: self, willMoveTo: newDate)
 
@@ -454,14 +466,14 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
             let direction: UIPageViewController.NavigationDirection = leftToRight ? .reverse : .forward
             pagingViewController.setViewControllers([newController],
                                                     direction: direction,
-                                                    animated: true,
+                                                    animated: false, // TODO: Don't animate on selectedDate change
                                                     completion: completionHandler(_:))
         } else if newDate > oldDate {
             let leftToRight = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .leftToRight
             let direction: UIPageViewController.NavigationDirection = leftToRight ? .forward : .reverse
             pagingViewController.setViewControllers([newController],
                                                     direction: direction,
-                                                    animated: true,
+                                                    animated: false, // TODO: Don't animate on selectedDate change
                                                     completion: completionHandler(_:))
         }
     }

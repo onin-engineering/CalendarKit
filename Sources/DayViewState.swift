@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol DayViewStateUpdating: AnyObject {
-    func move(from oldDate: Date, to newDate: Date)
+  func move(from oldDate: Date, to newDate: Date, scrollToNow: Bool)
 }
 
 public final class DayViewState {
@@ -26,6 +26,7 @@ public final class DayViewState {
         notify(clients: allClientsWithout(client: client),
                moveTo: date)
         selectedDate = date
+      
     }
 
     public func subscribe(client: DayViewStateUpdating) {
@@ -42,7 +43,7 @@ public final class DayViewState {
 
     private func notify(clients: [DayViewStateUpdating], moveTo date: Date) {
         for client in clients {
-            client.move(from: selectedDate, to: date)
+          client.move(from: selectedDate, to: date, scrollToNow: true)
         }
     }
 }

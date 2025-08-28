@@ -1,7 +1,10 @@
 import UIKit
 
 open class DayViewController: UIViewController, EventDataSource, DayViewDelegate {
-    public lazy var dayView: CalendarDayView = CalendarDayView()
+  public var initialDate: Date = Date()
+
+  public lazy var dayView: CKDayView  = CKDayView(initialDate: initialDate)
+
     public var dataSource: EventDataSource? {
         get {
             dayView.dataSource
@@ -19,6 +22,7 @@ open class DayViewController: UIViewController, EventDataSource, DayViewDelegate
             dayView.delegate = value
         }
     }
+
 
     public var calendar = Calendar.autoupdatingCurrent {
         didSet {
@@ -88,15 +92,15 @@ open class DayViewController: UIViewController, EventDataSource, DayViewDelegate
     open func dayViewDidSelectEventView(_ eventView: EventView) {}
     open func dayViewDidLongPressEventView(_ eventView: EventView) {}
 
-    open func dayView(dayView: CalendarDayView, didTapTimelineAt date: Date) {}
-    open func dayViewDidBeginDragging(dayView: CalendarDayView) {}
-    open func dayViewDidTransitionCancel(dayView: CalendarDayView) {}
+    open func dayView(dayView: CKDayView, didTapTimelineAt date: Date) {}
+    open func dayViewDidBeginDragging(dayView: CKDayView) {}
+    open func dayViewDidTransitionCancel(dayView: CKDayView) {}
 
-    open func dayView(dayView: CalendarDayView, willMoveTo date: Date) {}
-    open func dayView(dayView: CalendarDayView, didMoveTo date: Date) {}
+    open func dayView(dayView: CKDayView, willMoveTo date: Date) {}
+    open func dayView(dayView: CKDayView, didMoveTo date: Date) {}
 
-    open func dayView(dayView: CalendarDayView, didLongPressTimelineAt date: Date) {}
-    open func dayView(dayView: CalendarDayView, didUpdate event: EventDescriptor) {}
+    open func dayView(dayView: CKDayView, didLongPressTimelineAt date: Date) {}
+    open func dayView(dayView: CKDayView, didUpdate event: EventDescriptor) {}
 
     // MARK: - Editing
 

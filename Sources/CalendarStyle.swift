@@ -39,8 +39,8 @@ public struct DaySelectorStyle {
     public var todayActiveTextColor = UIColor.white
     public var todayActiveBackgroundColor = SystemColors.systemRed
     
-    public var font = UIFont.systemFont(ofSize: 18)
-    public var todayFont = UIFont.boldSystemFont(ofSize: 18)
+    public var font = UIFont.systemFont(ofSize: 17)
+    public var todayFont = UIFont.boldSystemFont(ofSize: 17)
 
     public init() {}
 }
@@ -72,7 +72,7 @@ public struct TimelineStyle {
     public var verticalDiff: Double = 50
     public var verticalInset: Double = 10
     public var leadingInset: Double = 53
-    public var eventGap: Double = 0
+    public var eventGap: Double = 2
     public init() {}
 }
 

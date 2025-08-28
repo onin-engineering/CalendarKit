@@ -3,22 +3,23 @@ import UIKit
 public protocol DayViewDelegate: AnyObject {
     func dayViewDidSelectEventView(_ eventView: EventView)
     func dayViewDidLongPressEventView(_ eventView: EventView)
-    func dayView(dayView: CalendarDayView, didTapTimelineAt date: Date)
-    func dayView(dayView: CalendarDayView, didLongPressTimelineAt date: Date)
-    func dayViewDidBeginDragging(dayView: CalendarDayView)
-    func dayViewDidTransitionCancel(dayView: CalendarDayView)
-    func dayView(dayView: CalendarDayView, willMoveTo date: Date)
-    func dayView(dayView: CalendarDayView, didMoveTo  date: Date)
-    func dayView(dayView: CalendarDayView, didUpdate event: EventDescriptor)
+    func dayView(dayView: CKDayView, didTapTimelineAt date: Date)
+    func dayView(dayView: CKDayView, didLongPressTimelineAt date: Date)
+    func dayViewDidBeginDragging(dayView: CKDayView)
+    func dayViewDidTransitionCancel(dayView: CKDayView)
+    func dayView(dayView: CKDayView, willMoveTo date: Date)
+    func dayView(dayView: CKDayView, didMoveTo  date: Date)
+    func dayView(dayView: CKDayView, didUpdate event: EventDescriptor)
 }
 
-public class CalendarDayView: UIView, TimelinePagerViewDelegate {
+public class CKDayView: UIView, TimelinePagerViewDelegate {
     public weak var dataSource: EventDataSource? {
         get {
             timelinePagerView.dataSource
         }
         set(value) {
             timelinePagerView.dataSource = value
+            dayHeaderView.dataSource = value  
         }
     }
     
@@ -27,7 +28,7 @@ public class CalendarDayView: UIView, TimelinePagerViewDelegate {
     /// Hides or shows header view
     public var isHeaderViewVisible = true {
         didSet {
-            headerHeight = isHeaderViewVisible ? CalendarDayView.headerVisibleHeight : 0
+            headerHeight = isHeaderViewVisible ? CKDayView.headerVisibleHeight : 0
             dayHeaderView.isHidden = !isHeaderViewVisible
             setNeedsLayout()
             configureLayout()
@@ -73,7 +74,7 @@ public class CalendarDayView: UIView, TimelinePagerViewDelegate {
     
     private var style = CalendarStyle()
     
-    public init(calendar: Calendar = Calendar.autoupdatingCurrent) {
+  public init(calendar: Calendar = Calendar.autoupdatingCurrent, initialDate: Date = Date()) {
         self.calendar = calendar
         self.dayHeaderView = DayHeaderView(calendar: calendar)
         self.timelinePagerView = TimelinePagerView(calendar: calendar)
@@ -145,6 +146,7 @@ public class CalendarDayView: UIView, TimelinePagerViewDelegate {
     
     public func reloadData() {
         timelinePagerView.reloadData()
+        dayHeaderView.reloadData()
     }
     
     public func move(to date: Date) {

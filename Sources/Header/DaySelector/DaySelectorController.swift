@@ -2,49 +2,58 @@ import UIKit
 
 public final class DaySelectorController: UIViewController {
     public private(set) lazy var daySelector = DaySelector()
-    
+  
+    public weak var dataSource: EventDataSource? {
+      get {
+        daySelector.dataSource
+      }
+      set {
+        daySelector.dataSource = newValue
+      }
+  }
+  
     public var delegate: DaySelectorDelegate? {
         get {
-            daySelector.delegate
+          daySelector.delegate
         }
         set {
-            daySelector.delegate = newValue
+          daySelector.delegate = newValue
         }
     }
     
     public var calendar: Calendar {
         get {
-            daySelector.calendar
+          daySelector.calendar
         }
         set(newValue) {
-            daySelector.calendar = newValue
+          daySelector.calendar = newValue
         }
     }
     
     public var startDate: Date {
         get {
-            daySelector.startDate!
+          daySelector.startDate
         }
         set {
-            daySelector.startDate = newValue
+          daySelector.startDate = newValue
         }
     }
     
     public var selectedIndex: Int {
         get {
-            daySelector.selectedIndex
+          daySelector.selectedIndex
         }
         set {
-            daySelector.selectedIndex = newValue
+          daySelector.selectedIndex = newValue
         }
     }
     
     public var selectedDate: Date? {
         get {
-            daySelector.selectedDate
+          daySelector.selectedDate
         }
         set {
-            daySelector.selectedDate = newValue
+          daySelector.selectedDate = newValue
         }
     }
     
@@ -53,10 +62,14 @@ public final class DaySelectorController: UIViewController {
     }
     
     func transitionToHorizontalSizeClass(_ sizeClass: UIUserInterfaceSizeClass) {
-        daySelector.transitionToHorizontalSizeClass(sizeClass)
+      daySelector.transitionToHorizontalSizeClass(sizeClass)
     }
     
     public func updateStyle(_ newStyle: DaySelectorStyle) {
-        daySelector.updateStyle(newStyle)
+      daySelector.updateStyle(newStyle)
+    }
+  
+    public func reloadData() {
+      daySelector.reloadData()
     }
 }
